@@ -21,13 +21,22 @@ def accept_bids(team):
 
         time_gap = bid_time - last_time
         seconds = divmod(time_gap.total_seconds(), 60)[1]
+
         if seconds < 10:
-            new_bid = Bids.create(participant=bidder,
-                                  team_bid=bid_team,
-                                  bid_amount=amt,
-                                  bid_time_stamp=bid_time)
-            new_bid.save()
-            last_time = bid_time
+            if Bids.select(fn.MAX(Bids.bid_amount)).scalar():
+                curr_max = Bids.select(fn.MAX(Bids.bid_amount)).scalar()
+            else:
+                curr_max = 0
+
+            if amt > curr_max:
+                new_bid = Bids.create(participant=bidder,
+                                      team_bid=bid_team,
+                                      bid_amount=amt,
+                                      bid_time_stamp=bid_time)
+                new_bid.save()
+                last_time = bid_time
+            else:
+                print("The bid is too low. Bid again.")
         else:
             print("The auction for {} is over. Your bid does not count".format(bid_team))
             break

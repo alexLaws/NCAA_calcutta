@@ -1,9 +1,8 @@
 from peewee import *
 import os
 
-from playhouse.db_url import connect
-
-database = connect(os.environ.get('DATABASE_URL', 'sqlite:///my_database.db'))
+database = SqliteDatabase('auction.db')
+database.connect()
 database.execute_sql('PRAGMA foreign_keys = ON;')  # needed for sqlite only
 
 

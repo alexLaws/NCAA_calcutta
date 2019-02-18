@@ -6,3 +6,4 @@ MarkupSafe==1.0
 peewee==3.2.2
 psycopg2==2.7.4
 Werkzeug==0.14.1
+gunicorn==19.9.0

@@ -1,5 +1,4 @@
 import os
-import base64
 import datetime
 
 from flask import Flask, render_template, request, redirect, url_for, session
@@ -9,7 +8,7 @@ from model import Bid, Team
 from peewee import fn
 
 app = Flask(__name__)
-
+# app.secret_key = os.environ.get('SECRET_KEY').encode()
 
 @app.route('/')
 def home():

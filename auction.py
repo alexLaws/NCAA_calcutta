@@ -16,7 +16,10 @@ def accept_bids(team):
     last_time = datetime.datetime.now()
 
     while True:
-        amt = int(input("Bid: "))
+        try:
+            amt = int(input("Bid: "))
+        except:
+            
         bid_time = datetime.datetime.now()
 
         time_gap = bid_time - last_time

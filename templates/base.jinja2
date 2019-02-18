@@ -1,0 +1,15 @@
+<html>
+<head>
+<title>Crapcutta</title>
+</head>
+<body>
+    <nav>
+        <a id="home" href="{{url_for('home') }}">Home</a>
+        <a id="auction" href="{{url_for('auction') }}">Join the Auction</a>
+        <a id="view" href="{{url_for('view') }}">View all bids</a>
+    </nav>
+	<h1>Calcutta 2019</h1>
+	<h2>{% block subtitle %} {% endblock subtitle %}</h2>
+	{% block content %} {% endblock content %}
+</body>
+</html>

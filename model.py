@@ -4,7 +4,7 @@ import os
 from playhouse.db_url import connect
 
 database = connect(os.environ.get('DATABASE_URL', 'sqlite:///auction.db'))
-database.execute_sql('PRAGMA foreign_keys = ON;')  # needed for sqlite only
+# database.execute_sql('PRAGMA foreign_keys = ON;')  # needed for sqlite only
 
 
 class BaseModel(Model):

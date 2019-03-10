@@ -1,6 +1,18 @@
 <html>
 <head>
 <title>Crapcutta</title>
+<!-- import Bulma CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.0/css/bulma.min.css">
+<!-- custom styles -->
+<style>
+    #bid-list .card {
+        margin-bottom: 10px;
+    }
+    #bid-list .card.deactivated {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+</style>
 </head>
 <body>
     <nav>
@@ -11,5 +23,49 @@
 	<h1>Calcutta 2019</h1>
 	<h2>{% block subtitle %} {% endblock subtitle %}</h2>
 	{% block content %} {% endblock content %}
+    <script src="https://js.pusher.com/4.1/pusher.min.js"></script>
+    <script>
+        // configure pusher
+        const pusher = new Pusher('162355e8decc1f5cd0a7', {
+          cluster: 'us2', // gotten from Pusher app dashboard
+          encrypted: true // optional
+        });
+        // subscribe to `auction` public channel
+        const channel = pusher.subscribe('auction');
+
+        channel.bind('bid-added', data => {
+          appendToList(data);
+        });
+
+        const form = document.querySelector('#bid-form');
+
+        // makes POST request to store blog post on form submit
+        form.onsubmit = e => {
+          e.preventDefault();
+          fetch("/bid", {
+            method: 'POST',
+            body: new FormData(form)
+          })
+          .then(r => {
+            form.reset();
+          });
+        }
+
+        function appendToList(data) {
+          const html = `
+            <div class="card" id="${data.id}">
+              <header class="card-header">
+                <p class="card-header-title">${data.bidder}</p>
+              </header>
+              <div class="card-content">
+                <div class="content">
+                  <p>${data.bid_amt}</p>
+                </div>
+              </div>
+            </div>`;
+          let list = document.querySelector("#bid-list")
+          list.innerHTML += html;
+        };
+    </script>
 </body>
 </html>

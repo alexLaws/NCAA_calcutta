@@ -5,9 +5,32 @@
 {% block content %}
 <p>Current High Bid for {{ team }} is {{ high_bid }} by {{ leader }}.</p>
 {% if error %}<span class="error">{{ error }}<br><br>{% endif %}
-<form method="POST">
-    <label for="name-input">Your Name: </label><input id="name-input" type="text" name="name"><br>
-    <label for="amount-input">Your Bid:</label><input id="amount-input" type="number" name="bid"><br><br>
-    <input type="submit" value="Submit this Bid">
-</form>
+
+<div class="columns">
+    <div class="column">
+        <form id="bid-form">
+            <div class="field">
+                <label for="name-input" class="label">Your Name: </label>
+                <div class="control">
+                    <input id="name-input" name="name" class="input" type="text" placeholder="Enter your name here">
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="amount-input" class="label">Your Bid: </label>
+                <div class="control">
+                    <input id="amount-input" name="bid" type="number" placeholder="Enter your bid here">
+                </div>
+            </div>
+
+            <div class="field">
+                <input type="submit" value="Place Bid">
+            </div>
+        </form>
+    </div>
+
+    <div class="column">
+        <div id="bid-list"></div>
+    </div>
+</div>
 {% endblock content %}

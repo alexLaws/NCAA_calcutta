@@ -68,6 +68,17 @@ def addBid():
                 }
         pusher.trigger("auction", "bid-added", data)
         return jsonify(data)
+    else:
+        message = bidder + ' - FAILED BID'
+        data = {'id': "bid-{}".format(uuid.uuid4().hex),
+                'team': team_for_bid[0].team,
+                'bidder': message,
+                'bid_amt': bid_amt,
+                'status': 'active',
+                'event_name': 'created'
+                }
+        pusher.trigger("auction", "bid-added", data)
+        return jsonify(data)
 
 
 @app.route('/view/')

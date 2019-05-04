@@ -26,6 +26,13 @@ chris = User(username='bubernakChris',
 chris.set_password('captain')
 chris.save()
 
+keith = User(username='porcaroKeith',
+             email='bluelightspecial@gmail.com',
+             first_name='Keith',
+             last_name='Porcaro')
+keith.set_password('boston')
+keith.save()
+
 kober = Auction(auction_name="Kober6",
                 code="crapfest")
 kober.save()
@@ -34,9 +41,17 @@ seattle = Auction(auction_name="Voodoo",
                   code="do the doo")
 seattle.save()
 
+boston = Auction(auction_name="Worst Coast",
+                 code="Least")
+boston.save()
+
 User_access.create(user_in_auction=alex,
                    auction=kober)
 User_access.create(user_in_auction=alex,
                    auction=seattle)
 User_access.create(user_in_auction=chris,
                    auction=seattle)
+User_access.create(user_in_auction=keith,
+                   auction=kober)
+User_access.create(user_in_auction=keith,
+                   auction=boston)

@@ -77,6 +77,12 @@ class NewAuctionForm(FlaskForm):
             raise ValidationError('There is already an auction with that name.')
 
 
+class JoinAuctionForm(FlaskForm):
+    auction_name = StringField('Auction Name', validators=[DataRequired()])
+    code = PasswordField('Auction Code', validators=[DataRequired()])
+    submit = SubmitField('Join!')
+
+
 def get_object_or_404(model, *criterion):
     output = model.select().where(*criterion).get()
     if output is None:
@@ -231,6 +237,24 @@ def new_auction():
         flash('Congratulations, you have created a new auction!')
         return redirect(url_for('user', username=current_user.username))
     return render_template('newAuction.jinja2', form=form)
+
+
+@app.route('/joinAuction', methods=['GET', 'POST'])
+@login_required
+def join():
+    form = JoinAuctionForm()
+    if form.validate_on_submit():
+        join_auction = Auction.select().where(Auction.auction_name == form.auction_name.data).get()
+        if join_auction is None:
+            flash('Auction Does Not Exist')
+            return redirect(url_for('join'))
+        elif form.code.data == join_auction.code:
+            user = User.select().where(User.username == current_user.username).get()
+            new_access = User_access(user_in_auction=user,
+                                     auction=join_auction)
+            new_access.save()
+        return redirect(url_for('user', username=current_user.username))
+    return render_template('join.jinja2', form=form)
 
 
 if __name__ == "__main__":

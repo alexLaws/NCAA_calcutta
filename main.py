@@ -51,8 +51,7 @@ class RegistrationForm(FlaskForm):
     first = StringField('First Name', validators=[DataRequired()])
     last = StringField('Last Name', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
-    password2 = PasswordField(
-        'Repeat Password', validators=[DataRequired(), EqualTo('password')])
+    password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Register')
 
     def validate_username(self, username):
@@ -64,6 +63,18 @@ class RegistrationForm(FlaskForm):
         user_count = User.select(fn.Count(User.email)).where(User.email == email.data).scalar()
         if user_count == 1:
             raise ValidationError('There is already a user with that email.')
+
+
+class NewAuctionForm(FlaskForm):
+    auction_name = StringField('Auction Name', validators=[DataRequired()])
+    code = PasswordField('Auction Code', validators=[DataRequired()])
+    code2 = PasswordField('Repeat Auction Code', validators=[DataRequired(), EqualTo('code')])
+    submit = SubmitField('Create Auction')
+
+    def validate_auction_name(self, auction_name):
+        auction_count = Auction.select(fn.Count(Auction.auction_name)).where(Auction.auction_name == auction_name.data).scalar()
+        if auction_count == 1:
+            raise ValidationError('There is already an auction with that name.')
 
 
 def get_object_or_404(model, *criterion):
@@ -83,7 +94,7 @@ def get_leader(auction):
                                     (Bid.bid_amount == high_bid) &
                                     (Bid.auction == auction)).get()
         bid_leader = leader.participant
-    except model.BidDoesNotExist:
+    except Bid.DoesNotExist:
         high_bid = 0
         bid_leader = 'Nobody'
     return team_for_bid, high_bid, bid_leader
@@ -162,7 +173,7 @@ def addBid():
                 'status': 'active',
                 'event_name': 'created'
                 }
-        pusher.trigger("auction", "bid-added", data)
+        pusher.trigger(auction_name, "bid-added", data)
         return jsonify(data)
     else:
         message = bidder + ' - FAILED BID'
@@ -173,7 +184,7 @@ def addBid():
                 'status': 'active',
                 'event_name': 'created'
                 }
-        pusher.trigger("auction", "bid-added", data)
+        pusher.trigger(auction_name, "bid-added", data)
         return jsonify(data)
 
 
@@ -203,6 +214,23 @@ def auction(auction_name):
                            leader=bid_leader,
                            high_bid=high_bid,
                            auction=auction)
+
+
+@app.route('/newAuction', methods=['GET', 'POST'])
+@login_required
+def new_auction():
+    form = NewAuctionForm()
+    if form.validate_on_submit():
+        created_auction = Auction(auction_name=form.auction_name.data,
+                                  code=form.code.data)
+        created_auction.save()
+        user = User.select().where(User.username == current_user.username).get()
+        new_access = User_access(user_in_auction=user,
+                                 auction=created_auction)
+        new_access.save()
+        flash('Congratulations, you have created a new auction!')
+        return redirect(url_for('user', username=current_user.username))
+    return render_template('newAuction.jinja2', form=form)
 
 
 if __name__ == "__main__":

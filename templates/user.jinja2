@@ -4,7 +4,7 @@
     <h1>Auctions for {{ user.first_name }} {{ user.last_name }}:</h1>
     {% for auction in auctions %}
     <p>
-        <b>{{ auction.auction.auction_name }}</b>
+        <a href="{{url_for('auction', auction_name=auction.auction.auction_name) }}">{{ auction.auction.auction_name }}</a>
     </p>
     {% endfor %}
 {% endblock %}

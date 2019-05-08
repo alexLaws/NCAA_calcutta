@@ -74,11 +74,14 @@ def get_object_or_404(model, *criterion):
         return output
 
 
-def get_leader():
+def get_leader(auction):
     team_for_bid = Team.select()
     try:
-        high_bid = Bid.select(fn.MAX(Bid.bid_amount)).where(Bid.team_bid == team_for_bid[0]).scalar()
-        leader = Bid.select().where((Bid.team_bid == team_for_bid[0]) & (Bid.bid_amount == high_bid)).get()
+        high_bid = Bid.select(fn.MAX(Bid.bid_amount)).where((Bid.team_bid == team_for_bid[0]) &
+                                                            (Bid.auction == auction)).scalar()
+        leader = Bid.select().where((Bid.team_bid == team_for_bid[0]) &
+                                    (Bid.bid_amount == high_bid) &
+                                    (Bid.auction == auction)).get()
         bid_leader = leader.participant
     except model.BidDoesNotExist:
         high_bid = 0
@@ -137,28 +140,21 @@ def logout():
     return redirect(url_for('home'))
 
 
-@app.route('/auction/', methods=['GET', 'POST'])
-@login_required
-def auction():
-    team_for_bid, high_bid, bid_leader = get_leader()
-    return render_template('auction.jinja2',
-                           team=team_for_bid[0].team,
-                           leader=bid_leader,
-                           high_bid=high_bid)
-
-
 # store new bid
 @app.route('/bid', methods=['POST'])
 @login_required
 def addBid():
-    team_for_bid, high_bid, bid_leader = get_leader()
     bidder = request.form['name']
     bid_amt = int(request.form['bid'])
+    auction_name = request.form['auction']
+    auction = Auction.select().where(Auction.auction_name == auction_name).get()
+    team_for_bid, high_bid, bid_leader = get_leader(auction)
     if bid_amt > high_bid:
         Bid.create(participant=bidder,
                    team_bid=team_for_bid[0],
                    bid_amount=bid_amt,
-                   bid_time_stamp=datetime.datetime.now())
+                   bid_time_stamp=datetime.datetime.now(),
+                   auction=auction)
         data = {'id': "bid-{}".format(uuid.uuid4().hex),
                 'team': team_for_bid[0].team,
                 'bidder': bidder,
@@ -195,6 +191,18 @@ def user(username):
     user = get_object_or_404(User, User.username == username)
     auctions = User_access.select().where(User_access.user_in_auction == user)
     return render_template('user.jinja2', user=user, auctions=auctions)
+
+
+@app.route('/auction/<auction_name>', methods=['GET', 'POST'])
+@login_required
+def auction(auction_name):
+    auction = Auction.select().where(Auction.auction_name == auction_name).get()
+    team_for_bid, high_bid, bid_leader = get_leader(auction)
+    return render_template('auction.jinja2',
+                           team=team_for_bid[0].team,
+                           leader=bid_leader,
+                           high_bid=high_bid,
+                           auction=auction)
 
 
 if __name__ == "__main__":

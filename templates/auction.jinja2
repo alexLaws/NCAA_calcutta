@@ -1,8 +1,9 @@
 {% extends 'base.jinja2' %}
 
-{% block subtitle %}Bid on {{ team }}{% endblock subtitle %}
 
 {% block content %}
+<h1>Welcome to the {{ auction.auction_name }} Auction</h1><br>
+
 <p>Current High Bid for {{ team }} is {{ high_bid }} by {{ leader }}.</p>
 {% if error %}<span class="error">{{ error }}<br><br>{% endif %}
 
@@ -12,14 +13,21 @@
             <div class="field">
                 <label for="name-input" class="label">Your Name: </label>
                 <div class="control">
-                    <input id="name-input" name="name" class="input" type="text" placeholder="Enter your name here">
+                    <input id="name-input" name="name" class="input" type="text" value={{ current_user.first_name}} readonly required>
                 </div>
             </div>
 
             <div class="field">
                 <label for="amount-input" class="label">Your Bid: </label>
                 <div class="control">
-                    <input id="amount-input" name="bid" type="number" placeholder="Enter your bid here">
+                    <input id="amount-input" name="bid" type="number" placeholder="Enter your bid here" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="auction-input" class="label">Your Auction: </label>
+                <div class="control">
+                    <input id="auction-input" name="auction" type="text" value={{ auction.auction_name }} required readonly>
                 </div>
             </div>
 

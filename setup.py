@@ -7,11 +7,6 @@ database.create_tables([Bid, Team, User, Auction, User_access])
 duke = Team(team="Duke Blue Devils")
 duke.save()
 
-Bid.create(participant="Alex",
-           team_bid=duke,
-           bid_amount=1,
-           bid_time_stamp=datetime.datetime.now())
-
 alex = User(username='lawsalex',
             email='tal1286@gmail.com',
             first_name='Alex',
@@ -41,7 +36,7 @@ seattle = Auction(auction_name="Voodoo",
                   code="do the doo")
 seattle.save()
 
-boston = Auction(auction_name="Worst Coast",
+boston = Auction(auction_name="WorstCoast",
                  code="Least")
 boston.save()
 
@@ -55,3 +50,21 @@ User_access.create(user_in_auction=keith,
                    auction=kober)
 User_access.create(user_in_auction=keith,
                    auction=boston)
+
+Bid.create(participant="Alex",
+           team_bid=duke,
+           bid_amount=1,
+           bid_time_stamp=datetime.datetime.now(),
+           auction=kober)
+
+Bid.create(participant="chris",
+           team_bid=duke,
+           bid_amount=2,
+           bid_time_stamp=datetime.datetime.now(),
+           auction=seattle)
+
+Bid.create(participant="keith",
+           team_bid=duke,
+           bid_amount=3,
+           bid_time_stamp=datetime.datetime.now(),
+           auction=boston)

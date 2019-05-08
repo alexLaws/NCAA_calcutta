@@ -23,6 +23,14 @@ class Team(BaseModel):
     team = CharField(max_length=30, unique=True)
 
 
+class Auction(BaseModel):
+    """
+        This class defines the auction groups
+    """
+    auction_name = CharField(max_length=30, unique=True)
+    code = CharField(max_length=30)
+
+
 class Bid(BaseModel):
     """
         This class defines bids that people make on teams
@@ -31,6 +39,7 @@ class Bid(BaseModel):
     team_bid = ForeignKeyField(Team)
     bid_amount = IntegerField()
     bid_time_stamp = DateTimeField(primary_key=True)
+    auction = ForeignKeyField(Auction)
 
 
 class User(UserMixin, BaseModel):
@@ -51,14 +60,6 @@ class User(UserMixin, BaseModel):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
-
-
-class Auction(BaseModel):
-    """
-        This class defines the auction groups
-    """
-    auction_name = CharField(max_length=30, unique=True)
-    code = CharField(max_length=30)
 
 
 class User_access(BaseModel):

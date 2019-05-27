@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, redirect, flash, url_for, ses
 from pusher import Pusher
 import uuid
 
-from model import Bid, Team, User, Auction, User_access
+from model import Bid, Team, User, Auction, User_access, Auction_result
 import model
 
 from peewee import fn
@@ -18,6 +18,8 @@ from flask_login import LoginManager, current_user, login_user, logout_user, log
 
 from werkzeug.urls import url_parse
 from werkzeug.exceptions import abort
+
+import random
 
 # create flask app
 app = Flask(__name__)
@@ -91,19 +93,42 @@ def get_object_or_404(model, *criterion):
         return output
 
 
-def get_leader(auction):
-    team_for_bid = Team.select()
+def get_current_team(auction_name):
     try:
-        high_bid = Bid.select(fn.MAX(Bid.bid_amount)).where((Bid.team_bid == team_for_bid[0]) &
-                                                            (Bid.auction == auction)).scalar()
-        leader = Bid.select().where((Bid.team_bid == team_for_bid[0]) &
-                                    (Bid.bid_amount == high_bid) &
-                                    (Bid.auction == auction)).get()
-        bid_leader = leader.participant
-    except Bid.DoesNotExist:
-        high_bid = 0
-        bid_leader = 'Nobody'
-    return team_for_bid, high_bid, bid_leader
+        curr = Auction.select(Auction.current_team).where(Auction.auction_name == auction_name).get()
+        return curr.current_team
+    except Auction.DoesNotExist:
+        return False
+
+
+def get_leader(auction):
+    team_for_bid = get_current_team(auction.auction_name)
+    if team_for_bid:
+        try:
+            high_bid = Bid.select(fn.MAX(Bid.bid_amount)).where((Bid.team_bid == team_for_bid) &
+                                                                (Bid.auction == auction)).scalar()
+            leader = Bid.select().where((Bid.team_bid == team_for_bid) &
+                                        (Bid.bid_amount == high_bid) &
+                                        (Bid.auction == auction)).get()
+            bid_leader = leader.participant
+        except Bid.DoesNotExist:
+            high_bid = 0
+            bid_leader = 'Nobody'
+        return team_for_bid, high_bid, bid_leader
+    else:
+        return False
+
+
+def get_next_team(auction):
+    try:
+        taken_teams = Auction_Result.select(Auction_Result.team).where(Auction_Result.auction == auction).get()
+    except Auction_Result.DoesNotExist:
+        taken_teams = []
+    try:
+        available_teams = Team.select().where(Team.team.not_in(taken_teams))
+    except Team.DoesNotExist:
+        return False
+    return random.choice(available_teams)
 
 
 @app.route('/')
@@ -168,27 +193,29 @@ def addBid():
     team_for_bid, high_bid, bid_leader = get_leader(auction)
     if bid_amt > high_bid:
         Bid.create(participant=bidder,
-                   team_bid=team_for_bid[0],
+                   team_bid=team_for_bid,
                    bid_amount=bid_amt,
                    bid_time_stamp=datetime.datetime.now(),
                    auction=auction)
         data = {'id': "bid-{}".format(uuid.uuid4().hex),
-                'team': team_for_bid[0].team,
+                'team': team_for_bid.team,
                 'bidder': bidder,
                 'bid_amt': bid_amt,
                 'status': 'active',
-                'event_name': 'created'
+                'event_name': 'created',
+                'reset': 1
                 }
         pusher.trigger(auction_name, "bid-added", data)
         return jsonify(data)
     else:
         message = bidder + ' - FAILED BID'
         data = {'id': "bid-{}".format(uuid.uuid4().hex),
-                'team': team_for_bid[0].team,
+                'team': team_for_bid.team,
                 'bidder': message,
                 'bid_amt': bid_amt,
                 'status': 'active',
-                'event_name': 'created'
+                'event_name': 'created',
+                'reset': 0
                 }
         pusher.trigger(auction_name, "bid-added", data)
         return jsonify(data)
@@ -216,7 +243,7 @@ def auction(auction_name):
     auction = Auction.select().where(Auction.auction_name == auction_name).get()
     team_for_bid, high_bid, bid_leader = get_leader(auction)
     return render_template('auction.jinja2',
-                           team=team_for_bid[0].team,
+                           team=team_for_bid.team,
                            leader=bid_leader,
                            high_bid=high_bid,
                            auction=auction)

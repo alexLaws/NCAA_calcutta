@@ -1,4 +1,4 @@
-from peewee import CharField, ForeignKeyField, IntegerField, DateTimeField, Model
+from peewee import CharField, ForeignKeyField, IntegerField, DateTimeField, BooleanField, Model
 import os
 
 from playhouse.db_url import connect
@@ -21,6 +21,9 @@ class Team(BaseModel):
         This class defines a team to bid on
     """
     team = CharField(max_length=30, unique=True)
+    # region
+    # seed
+    # 1st round opponenet
 
 
 class Auction(BaseModel):
@@ -29,6 +32,7 @@ class Auction(BaseModel):
     """
     auction_name = CharField(max_length=30, unique=True)
     code = CharField(max_length=30)
+    current_team = ForeignKeyField(Team, null=True)
 
 
 class Bid(BaseModel):
@@ -60,6 +64,16 @@ class User(UserMixin, BaseModel):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+
+class Auction_result(BaseModel):
+    """
+        This class contains all the teams sold, their buyers, and the price
+    """
+    auction = ForeignKeyField(Auction)
+    team = ForeignKeyField(Team)
+    buyer = ForeignKeyField(User)
+    price = IntegerField()
 
 
 class User_access(BaseModel):

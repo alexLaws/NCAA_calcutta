@@ -1,11 +1,17 @@
-from model import Bid, Team, User, Auction, User_access, database
+from model import Bid, Team, User, Auction, User_access, Auction_result, database
 import datetime
 
-database.drop_tables([Bid, Team, User, Auction, User_access])
-database.create_tables([Bid, Team, User, Auction, User_access])
+database.drop_tables([Bid, Team, User, Auction, User_access, Auction_result])
+database.create_tables([Bid, Team, User, Auction, User_access, Auction_result])
 
 duke = Team(team="Duke Blue Devils")
 duke.save()
+
+georgetown = Team(team="Georgetown Hoyas")
+georgetown.save()
+
+gonzaga = Team(team="Gonzaga Bulldogs")
+gonzaga.save()
 
 alex = User(username='lawsalex',
             email='tal1286@gmail.com',
@@ -29,21 +35,26 @@ keith.set_password('boston')
 keith.save()
 
 kober = Auction(auction_name="Kober6",
-                code="crapfest")
+                code="crapfest",
+                current_team=duke)
 kober.save()
 
 seattle = Auction(auction_name="Voodoo",
-                  code="do the doo")
+                  code="do the doo",
+                  current_team=duke)
 seattle.save()
 
 boston = Auction(auction_name="WorstCoast",
-                 code="Least")
+                 code="Least",
+                 current_team=duke)
 boston.save()
 
 User_access.create(user_in_auction=alex,
                    auction=kober)
 User_access.create(user_in_auction=alex,
                    auction=seattle)
+User_access.create(user_in_auction=alex,
+                   auction=boston)
 User_access.create(user_in_auction=chris,
                    auction=seattle)
 User_access.create(user_in_auction=keith,
@@ -68,3 +79,18 @@ Bid.create(participant="keith",
            bid_amount=3,
            bid_time_stamp=datetime.datetime.now(),
            auction=boston)
+
+Auction_result.create(auction=kober,
+                      team=gonzaga,
+                      buyer=alex,
+                      price=10)
+
+Auction_result.create(auction=seattle,
+                      team=gonzaga,
+                      buyer=chris,
+                      price=15)
+
+Auction_result.create(auction=boston,
+                      team=gonzaga,
+                      buyer=keith,
+                      price=13)

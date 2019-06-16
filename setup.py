@@ -36,18 +36,23 @@ keith.save()
 
 kober = Auction(auction_name="Kober6",
                 code="crapfest",
-                current_team=duke)
+                current_team=None)
 kober.save()
 
 seattle = Auction(auction_name="Voodoo",
                   code="do the doo",
-                  current_team=duke)
+                  current_team=None)
 seattle.save()
 
 boston = Auction(auction_name="WorstCoast",
                  code="Least",
-                 current_team=duke)
+                 current_team=None)
 boston.save()
+
+test = Auction(auction_name="test",
+               code="test",
+               current_team=None)
+test.save()
 
 User_access.create(user_in_auction=alex,
                    auction=kober)
@@ -55,42 +60,11 @@ User_access.create(user_in_auction=alex,
                    auction=seattle)
 User_access.create(user_in_auction=alex,
                    auction=boston)
+User_access.create(user_in_auction=alex,
+                   auction=test)
 User_access.create(user_in_auction=chris,
                    auction=seattle)
 User_access.create(user_in_auction=keith,
                    auction=kober)
 User_access.create(user_in_auction=keith,
                    auction=boston)
-
-Bid.create(participant="Alex",
-           team_bid=duke,
-           bid_amount=1,
-           bid_time_stamp=datetime.datetime.now(),
-           auction=kober)
-
-Bid.create(participant="chris",
-           team_bid=duke,
-           bid_amount=2,
-           bid_time_stamp=datetime.datetime.now(),
-           auction=seattle)
-
-Bid.create(participant="keith",
-           team_bid=duke,
-           bid_amount=3,
-           bid_time_stamp=datetime.datetime.now(),
-           auction=boston)
-
-Auction_result.create(auction=kober,
-                      team=gonzaga,
-                      buyer=alex,
-                      price=10)
-
-Auction_result.create(auction=seattle,
-                      team=gonzaga,
-                      buyer=chris,
-                      price=15)
-
-Auction_result.create(auction=boston,
-                      team=gonzaga,
-                      buyer=keith,
-                      price=13)

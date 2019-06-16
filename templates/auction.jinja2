@@ -5,14 +5,19 @@
 <div class="columns">
     <div class="column">
         <h1>Welcome to the {{ auction.auction_name }} Auction</h1><br>
-        <p>Current High Bid for {{ team }} is {{ high_bid }} by {{ leader }}.</p>
+        {% if team %}<p>Current High Bid for {{ team }} is {{ high_bid }} by {{ leader }}.</p>{% endif %}
         {% if error %}<span class="error">{{ error }}<br><br>{% endif %}
+        {% if not finished %}
+        <form id="start">
+            <div class="field">
+                <input type="submit" value="Start Auction" onclick="style.display = 'none'">
+            </div>
+        </form>
+        {% endif %}
     </div>
 
     <div class="column">
-        <div class="timer">
-            <p id="time"></p>
-        </div>
+        <div id="time"></div>
     </div>
 </div>
 
@@ -22,7 +27,7 @@
             <div class="field">
                 <label for="name-input" class="label">Your Name: </label>
                 <div class="control">
-                    <input id="name-input" name="name" class="input" type="text" value={{ current_user.first_name }} readonly required>
+                    <input id="name-input" name="name" class="input" type="text" value={{ current_user.username }} readonly required>
                 </div>
             </div>
 
@@ -78,6 +83,20 @@
           });
         }
 
+        const start = document.querySelector('#start');
+
+        // makes POST request to start timer
+        start.onsubmit = e => {
+          e.preventDefault();
+          fetch("/start/{{ auction.auction_name }}", {
+            method: 'POST',
+            body: new FormData(start)
+          })
+          .then(r => {
+            start.reset();
+          });
+        }
+
         function appendToList(data) {
           const html = `
             <div class="card" id="${data.id}">
@@ -92,6 +111,26 @@
             </div>`;
           let list = document.querySelector("#bid-list")
           list.innerHTML = html + list.innerHTML;
+        };
+
+        channel.bind('timing', data => {
+          countdown(data);
+        });
+
+        function countdown(data) {
+          const html = `
+            <div class="card" id="${data.id}">
+              <header class="card-header">
+                <p class="card-header-title">Time Left:</p>
+              </header>
+              <div class="card-content">
+                <div class="content">
+                  <p>${data.time_remaining} seconds!</p>
+                </div>
+              </div>
+            </div>`;
+          let list = document.querySelector("#time")
+          list.innerHTML = html;
         };
     </script>
 {% endblock content %}

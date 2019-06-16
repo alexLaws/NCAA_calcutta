@@ -33,17 +33,7 @@ class Auction(BaseModel):
     auction_name = CharField(max_length=30, unique=True)
     code = CharField(max_length=30)
     current_team = ForeignKeyField(Team, null=True)
-
-
-class Bid(BaseModel):
-    """
-        This class defines bids that people make on teams
-    """
-    participant = CharField(max_length=30)
-    team_bid = ForeignKeyField(Team)
-    bid_amount = IntegerField()
-    bid_time_stamp = DateTimeField(primary_key=True)
-    auction = ForeignKeyField(Auction)
+    complete = BooleanField(default=False)
 
 
 class User(UserMixin, BaseModel):
@@ -81,4 +71,15 @@ class User_access(BaseModel):
         This class defines the auctions to which users have access
     """
     user_in_auction = ForeignKeyField(User)
+    auction = ForeignKeyField(Auction)
+
+
+class Bid(BaseModel):
+    """
+        This class defines bids that people make on teams
+    """
+    participant = ForeignKeyField(User)
+    team_bid = ForeignKeyField(Team)
+    bid_amount = IntegerField()
+    bid_time_stamp = DateTimeField(primary_key=True)
     auction = ForeignKeyField(Auction)

@@ -11,3 +11,4 @@ pusher==2.1.3
 wtforms==2.2.1
 flask-login==0.4.1
 flask-wtf==0.14.2
+celery==4.3.0

@@ -213,7 +213,6 @@ def logout():
     return redirect(url_for('home'))
 
 
-@celery_app.task
 @app.route('/start/<auction_name>', methods=['POST'])
 @login_required
 def start_auction(auction_name):

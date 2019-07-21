@@ -45,7 +45,7 @@ pusher = Pusher(
 
 time_left = 20
 
-celery_app = Celery('tasks', broker='pyamqp://guest@localhost//')
+celery_app = Celery('tasks', broker='amqp://wrjccpkw:iewNFpJxOa6tzgxzcjjRu33gT6koUkun@wasp.rmq.cloudamqp.com/wrjccpkw')
 
 
 class LoginForm(FlaskForm):

@@ -23,6 +23,8 @@ import random
 
 from time import sleep
 
+from celery import Celery
+
 # create flask app
 app = Flask(__name__)
 # app.secret_key = os.environ.get('SECRET_KEY').encode()
@@ -42,6 +44,8 @@ pusher = Pusher(
     ssl=True)
 
 time_left = 20
+
+celery_app = Celery('tasks', broker='pyamqp://guest@localhost//')
 
 
 class LoginForm(FlaskForm):
@@ -209,6 +213,7 @@ def logout():
     return redirect(url_for('home'))
 
 
+@celery_app.task
 @app.route('/start/<auction_name>', methods=['POST'])
 @login_required
 def start_auction(auction_name):
@@ -279,6 +284,7 @@ def start_auction(auction_name):
 
 
 # store new bid
+@celery_app.task
 @app.route('/bid', methods=['POST'])
 @login_required
 def addBid():

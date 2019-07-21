@@ -216,6 +216,11 @@ def logout():
 @app.route('/start/<auction_name>', methods=['POST'])
 @login_required
 def start_auction(auction_name):
+    start_the_auction.delay(auction_name)
+
+
+@celery_app.task
+def start_the_auction(auction_name):
     global time_left
     auction = get_auction_obj(auction_name)
     available_teams = list(Team.select())
@@ -282,11 +287,8 @@ def start_auction(auction_name):
     return 'hooray'
 
 
-# store new bid
 @celery_app.task
-@app.route('/bid', methods=['POST'])
-@login_required
-def addBid():
+def bid_creation():
     global time_left
     bidder = user_from_username(request.form['name'])
     bid_amt = int(request.form['bid'])
@@ -322,6 +324,13 @@ def addBid():
                 }
         pusher.trigger(auction_name, "bid-added", data)
         return jsonify(data)
+
+
+# store new bid
+@app.route('/bid', methods=['POST'])
+@login_required
+def addBid():
+    bid_creation.delay()
 
 
 @app.route('/view/')

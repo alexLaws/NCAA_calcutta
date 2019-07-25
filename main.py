@@ -213,12 +213,6 @@ def logout():
     return redirect(url_for('home'))
 
 
-@app.route('/start/<auction_name>', methods=['POST'])
-@login_required
-def start_auction(auction_name):
-    start_the_auction.delay(auction_name)
-
-
 @celery_app.task
 def start_the_auction(auction_name):
     global time_left
@@ -285,6 +279,12 @@ def start_the_auction(auction_name):
                               price=high_bid)
         sleep(3)
     return 'hooray'
+
+
+@app.route('/start/<auction_name>', methods=['POST'])
+@login_required
+def start_auction(auction_name):
+    start_the_auction.delay(auction_name)
 
 
 @celery_app.task
